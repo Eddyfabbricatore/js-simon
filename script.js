@@ -1,51 +1,100 @@
-/*
-1. Generare 5 numeri random
-2. Controllo se i numeri generati sono inclusi dentro l'array num
-  - Se non sono presenti aggiungerli e incrementare il counter
-3. Stampare i numeri in pagina
-4. Far partire un timer di 5 secondi e resettare il contenuto della pagina
- */
+const display = document.getElementById('display');
+const message = document.getElementById('message');
+const btn = document.querySelector('button');
 
-
-const nums = document.querySelector('h1');
-
-// creo il numero di numeri random totali
-const randomNum = 5;
-// creo l'array vuoto
-let num = [];
-// creo il counter e lo inizializzo a 0
-let counter = 0;
+const totalNumbers = 5;
+const attesa = 3;
+let randomNumbers = [];
 
 init();
 
-setInterval(reset, 5000);
 
-
-/* function */
 function init(){
-  num = createRandomNum();
-
-  // 3. Stampo in pagina i numeri dell'array
-  nums.innerHTML = num;
+  message.innerHTML = '';
+  display.innerHTML = '';
+  btn.addEventListener('click', start);
 }
 
-function createRandomNum(){
-  // 1. Genero 5 numeri random
-  do {
-    const random = Math.ceil(Math.random() * 10);
+function start(){
+  this.classList.add('d-none');
 
-    // 2. Controllo se il numero generato è incluso dentro l'array
-    if(!(num.includes(random))){
-      // Se il numero non era presente viene aggiunto e il contatore viene incrementato
-      num.push(random);
+  randomNumbers = getRandomNumbers();
 
-      counter++;
-    }
-  } while (counter < randomNum);
+  display.innerHTML = randomNumbers.join(', ');
+  message.innerHTML = 'Memorizza i seguenti numeri';
 
-  return num;
+  setTimeout(resetDisplay, attesa * 1000);
+
+  setTimeout(function(){
+    const userNumbers = insertNumbers(totalNumbers);
+
+    const guessedNumbers = getGuessedNumbers(userNumbers);
+
+    endGame(guessedNumbers);
+  }, (attesa + 0.2) * 1000);
 }
 
-function reset(){
-  nums.innerHTML = '';
+function getRandomNumbers(){
+  const randomNumbers = [];
+  
+  while(randomNumbers.length < totalNumbers){
+    const randomNumber = getRandomNumber(1, 100);
+
+    if(!randomNumbers.includes(randomNumber)) randomNumbers.push(randomNumber);
+  }
+
+  return randomNumbers;
+}
+
+function endGame(guessedNumbers){
+  switch(guessedNumbers.length){
+    case 0:
+      message.innerHTML = 'Ma almeno uno potevi indovinarlo';
+      break;
+      
+    case 0:
+      message.innerHTML = 'Numero indovinato';
+      display.innerHTML = guessedNumbers[0];
+      break;
+
+    default:
+      message.innerHTML = 'Numeri indovinati';
+      display.innerHTML = guessedNumbers.join(', ');
+      break;
+  }
+
+  btn.classList.remove('d-none');
+}
+
+function getGuessedNumbers(numbersToCheck){
+  const guessed = [];
+
+  for(let i = 0; i < randomNumbers.length; i++){
+    const sNum = randomNumbers[i];
+
+    if(numbersToCheck.includes(sNum)) guessed.push(sNum);
+  }
+
+  return guessed;
+}
+
+function insertNumbers(tot){
+  const numbers = [];
+
+  while(numbers.length < tot){
+    const userNumber = parseInt(prompt('Inserisci un numero'));
+
+    if(!numbers.includes(userNumber)) numbers.push(userNumber);
+  }
+
+  return numbers;
+}
+
+function resetDisplay(){
+  display.innerHTML = '';
+  message.innerHTML = '';
+}
+
+function getRandomNumber(min, max){
+  return Math.floor(Math.random() * (max - min + 1) + min);
 }
